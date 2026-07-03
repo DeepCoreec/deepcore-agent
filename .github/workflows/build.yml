@@ -1,4 +1,4 @@
-name: Build & Release
+﻿name: Build & Release
 
 on:
   push:
@@ -14,6 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout deepcore_shared
+        uses: actions/checkout@v4
+        with:
+          repository: DeepCoreec/deepcore-shared
+          path: deepcore_shared
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -22,11 +28,6 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install pyinstaller
-
-      - name: Copiar deepcore_shared
-        run: xcopy /E /I ..\deepcore_shared deepcore_shared
-        shell: cmd
-        continue-on-error: true
 
       - name: Build con PyInstaller
         run: |
