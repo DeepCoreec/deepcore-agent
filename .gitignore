@@ -1,0 +1,11 @@
+dist/
+build/
+__pycache__/
+*.pyc
+*.spec
+*.db
+*.log
+*.zip
+deepcore_shared/
+.env
+rag/

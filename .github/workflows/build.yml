@@ -1,0 +1,49 @@
+name: Build & Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Copiar deepcore_shared
+        run: xcopy /E /I ..\deepcore_shared deepcore_shared
+        shell: cmd
+        continue-on-error: true
+
+      - name: Build con PyInstaller
+        run: |
+          pyinstaller --name DeepCoreAgent `
+            --windowed --onedir --noconfirm `
+            --add-data "deepcore_shared;deepcore_shared" `
+            --hidden-import=anthropic `
+            --hidden-import=chromadb `
+            main.py
+
+      - name: Crear ZIP
+        run: |
+          Compress-Archive -Path dist\DeepCoreAgent `
+            -DestinationPath DeepCoreAgent-Windows.zip
+
+      - name: Publicar Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: DeepCoreAgent-Windows.zip
+          generate_release_notes: true
