@@ -19,7 +19,7 @@ try:
 except ImportError:
     _CHROMA_OK = False
 
-MODEL = "claude-haiku-4-5-20251001"
+DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 4096
 SYSTEM_PROMPT = """Eres Aria, asistente IA de DeepCore Ecuador.
 Eres experta en negocios, contabilidad, RRHH, facturación SRI, tecnología y normativas ecuatorianas.
@@ -28,8 +28,9 @@ Si tienes contexto del usuario (documentos cargados), úsalo al responder."""
 
 
 class AgentCore:
-    def __init__(self, api_key: str | None = None):
+    def __init__(self, api_key: str | None = None, model: str | None = None):
         self._api_key = api_key
+        self._model   = model or DEFAULT_MODEL
         self._client  = None
         self._chroma  = None
         self._collection = None
@@ -41,6 +42,9 @@ class AgentCore:
     def set_api_key(self, key: str):
         self._api_key = key
         self._init_client(key)
+
+    def set_model(self, model: str):
+        self._model = model
 
     def _init_client(self, key: str):
         if not _ANTHROPIC_OK:
@@ -89,7 +93,7 @@ class AgentCore:
             full = ""
             try:
                 with self._client.messages.stream(
-                    model=MODEL,
+                    model=self._model,
                     max_tokens=MAX_TOKENS,
                     system=system,
                     messages=self._history[-20:]
